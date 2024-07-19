@@ -14,7 +14,7 @@ logger = logging.getLogger(__file__)
 def get_product_list(last_id, client_id, seller_token):
     """Получить список товаров магазина озон
     Args:
-        last_id (str): последний id
+        last_id (str): последний id страницы
         client_id (str): id клиента
         seller_token (str): токен продавца
 
@@ -206,7 +206,7 @@ def divide(lst: list, n: int):
 
 
 async def upload_prices(watch_remnants, client_id, seller_token):
-    """ Обновление старных цен
+    """ Обновление старых цен
     Args:
         watch_remnants (dict): Словарь с данными из файла excel
         client_id (str): id клиента

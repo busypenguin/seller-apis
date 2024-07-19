@@ -11,6 +11,16 @@ logger = logging.getLogger(__file__)
 
 
 def get_product_list(page, campaign_id, access_token):
+    """ Получить список товаров
+    Args:
+        page (str): страница
+        campaign_id (str): id компании
+        access_token (str): токен доступа
+    Returns:
+        dict: список товаров
+
+    Raises:
+        requests.exceptions.HTTPError """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -30,6 +40,17 @@ def get_product_list(page, campaign_id, access_token):
 
 
 def update_stocks(stocks, campaign_id, access_token):
+    """ Обновить остатки
+    Args:
+        stocks (list): список остатков товара
+        campaign_id (str): id компании
+        access_token (str): токен доступа
+
+    Returns:
+        dict: Словарь с остаточными товарами
+
+    Raises:
+        requests.exceptions.HTTPError"""
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -46,6 +67,18 @@ def update_stocks(stocks, campaign_id, access_token):
 
 
 def update_price(prices, campaign_id, access_token):
+    """Обновить цены
+    Args:
+        prices (list): цены
+        campaign_id (str): id компании
+        access_token (str): токен доступа
+        arg2 (str): Description of arg2
+
+    Returns:
+        dict: Словарь с ценами
+
+    Raises:
+        requests.exceptions.HTTPError """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -62,7 +95,13 @@ def update_price(prices, campaign_id, access_token):
 
 
 def get_offer_ids(campaign_id, market_token):
-    """Получить артикулы товаров Яндекс маркета"""
+    """ Получить артикулы товаров из магазина Яндекс Маркет
+    Args:
+        campaign_id (str): id компании
+        market_token (str): токен яндекс маркета
+
+    Returns:
+        offer_ids (list): список артикулов """
     page = ""
     product_list = []
     while True:
@@ -78,6 +117,14 @@ def get_offer_ids(campaign_id, market_token):
 
 
 def create_stocks(watch_remnants, offer_ids, warehouse_id):
+    """ Создание стоковых товаров
+    Args:
+        watch_remnants (dict): Словарь с данными из файла excel
+        offer_ids (list): список артикулов
+        warehouse_id (str) :id склада
+
+    Returns:
+        list: список товаров """
     # Уберем то, что не загружено в market
     stocks = list()
     date = str(datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
@@ -123,6 +170,13 @@ def create_stocks(watch_remnants, offer_ids, warehouse_id):
 
 
 def create_prices(watch_remnants, offer_ids):
+    """ Создать цены
+    Args:
+        watch_remnants (dict): Словарь с данными из файла excel
+        offer_ids (list): список артикулов
+
+    Returns:
+        list: список цен """
     prices = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -143,6 +197,15 @@ def create_prices(watch_remnants, offer_ids):
 
 
 async def upload_prices(watch_remnants, campaign_id, market_token):
+    """ Обновление старых цен
+    Args:
+        watch_remnants (dict): Словарь с данными из файла excel
+        client_id (str): id клиента
+        market_token (str): токен яндекс маркета
+
+    Returns:
+        list: Список данных товара со старой и новой ценой """
+
     offer_ids = get_offer_ids(campaign_id, market_token)
     prices = create_prices(watch_remnants, offer_ids)
     for some_prices in list(divide(prices, 500)):
@@ -151,6 +214,15 @@ async def upload_prices(watch_remnants, campaign_id, market_token):
 
 
 async def upload_stocks(watch_remnants, campaign_id, market_token, warehouse_id):
+    """ Обновить остатки
+    Args:
+        watch_remnants (dict): Словарь с данными из файла excel
+        client_id (str): id клиента
+        market_token (str): токен яндекс маркета
+        warehouse_id (str) :id склада
+
+    Returns:
+        bool: Description of return value """
     offer_ids = get_offer_ids(campaign_id, market_token)
     stocks = create_stocks(watch_remnants, offer_ids, warehouse_id)
     for some_stock in list(divide(stocks, 2000)):
